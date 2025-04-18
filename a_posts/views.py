@@ -1,19 +1,32 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from a_posts.models import Post
+from .models import *
 from bs4 import BeautifulSoup
 import requests
 from django.contrib import messages
 from a_posts.forms import *
 from .forms import *
 
-def home_view(request):
-    print("-=" * 20)
-    print('Request Method: ', request.method)
-    if request.method == 'POST':
-        print('Bye bye')
+
+def home_view(request, tag=None):
+    # print("-=" * 20)
+    # print('Request Method: ', request.method)
+    # if request.method == 'POST':
+    #     print('Bye bye')
+    if tag:
+        posts = Post.objects.filter(tags__slug=tag)
+        tag = get_object_or_404(Tag, slug=tag)
+    else:
+        posts = Post.objects.all()
         
-    posts = Post.objects.all()
-    return render(request, 'a_posts/home.html', {'posts': posts})
+    categories = Tag.objects.all()
+    
+    context = {
+        'posts': posts,
+        'categories' : categories,
+        'tag' : tag
+    }
+        
+    return render(request, 'a_posts/home.html', context)
 
 
 def post_create_view(request):
@@ -50,7 +63,7 @@ def post_create_view(request):
 
             # Agora sim, salva tudo no banco de dados
             post.save()
-
+            form.save_m2m()
             # Redireciona o usuário de volta para a página inicial
             return redirect('home')
 
