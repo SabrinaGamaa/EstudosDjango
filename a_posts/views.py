@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .models import *
 from bs4 import BeautifulSoup
 import requests
@@ -29,6 +30,7 @@ def home_view(request, tag=None):
     return render(request, 'a_posts/home.html', context)
 
 
+@login_required
 def post_create_view(request):
     form = PostCreateForm()
     
@@ -60,6 +62,8 @@ def post_create_view(request):
             find_artist = sourcecode.select('a.owner-name')
             artist = find_artist[0].text.strip()
             post.artist = artist  # Salva o artista no objeto post
+            
+            post.author = request.user
 
             # Agora sim, salva tudo no banco de dados
             post.save()
@@ -71,9 +75,10 @@ def post_create_view(request):
     return render(request, 'a_posts/post_create.html', {'form' : form})
  
  
+@login_required
 def post_delete_view(request, pk):
     referer = request.META.get('HTTP_REFERER', '/')
-    post = get_object_or_404(Post, id=pk)
+    post = get_object_or_404(Post, id=pk, author=request.user)
     
     if request.method == "POST":
         post.delete()
@@ -85,8 +90,9 @@ def post_delete_view(request, pk):
     return render (request, 'a_posts/post_delete.html', {'post' : post, 'referer' : referer})
 
 
+@login_required
 def post_edit_view(request, pk):
-    post = get_object_or_404(Post, id=pk)
+    post = get_object_or_404(Post, id=pk, author=request.user)
     form = PostEditForm(instance=post)
     
     if request.method == 'POST':
