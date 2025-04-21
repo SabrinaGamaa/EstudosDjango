@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from .models import *
 from bs4 import BeautifulSoup
 import requests
@@ -110,5 +111,91 @@ def post_edit_view(request, pk):
 
 
 def post_page_view(request, pk):
+    post = get_object_or_404(Post, id=pk) 
+    commentForm = CommentCreateForm()
+    replyform = ReplyCreateForm()
+    
+    context = {
+        'post' : post,
+        'commentform' : commentForm,
+        'replyform' : replyform,
+    }
+    
+    return render(request, 'a_posts/post_page.html', context)
+
+
+@login_required
+def comment_sent(request, pk):
     post = get_object_or_404(Post, id=pk)
-    return render(request, 'a_posts/post_page.html', {'post' : post})
+    
+    if request.method == 'POST':
+        form = CommentCreateForm(request.POST)
+        if form.is_valid:
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.parent_post = post
+            comment.save()
+            
+    return redirect('post', post.id)
+
+
+
+
+@login_required
+def comment_delete_view(request, pk):
+    post = get_object_or_404(Comment, id=pk, author=request.user)
+    
+    if request.method == "POST":
+        post.delete()
+        
+        messages.success(request, 'Comment deleted')
+        
+        return redirect('post', post.parent_post.id)
+    
+    return render (request, 'a_posts/comment_delete.html', {'comment' : post})
+
+
+
+@login_required
+def reply_sent(request, pk):
+    comment = get_object_or_404(Comment, id=pk)
+    
+    if request.method == 'POST':
+        form = ReplyCreateForm(request.POST)
+        if form.is_valid:
+            reply = form.save(commit=False)
+            reply.author = request.user
+            reply.parent_comment = comment
+            reply.save()
+            
+    return redirect('post', comment.parent_post.id)
+
+
+@login_required
+def reply_delete_view(request, pk):
+    reply = get_object_or_404(Reply, id=pk, author=request.user)
+    
+    if request.method == "POST":
+        reply.delete()
+        
+        messages.success(request, 'Reply deleted')
+        
+        return redirect('post', reply.parent_comment.parent_post.id)
+    
+    return render (request, 'a_posts/reply_delete.html', {'reply' : reply})
+
+
+
+@login_required
+def like_post(request, pk):
+    post = get_object_or_404(Post, id=pk)
+    user_exist = post.likes.filter(username=request.user.username).exists()
+    
+    if post.author != request.user:
+        if user_exist:
+            post.likes.remove(request.user)
+        else:
+            post.likes.add(request.user)
+        
+    return render(request, 'snippets/likes.html', {'post' : post})
+
