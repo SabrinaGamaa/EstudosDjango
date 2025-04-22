@@ -9,12 +9,11 @@ FireBlog demonstra:
 * Autenticação social com **django‑allauth**  
 * Relacionamentos avançados (`ForeignKey`, `ManyToMany`, signals)  
 * Atualizações assíncronas via **HTMX** (likes/curtidas sem reload)  
-* Padrões DRY – decorators genéricos, partials e template inheritance  
-* Pronto para deploy Render/Heroku + Docker  
+* Padrões DRY – decorators genéricos, partials e template inheritance   
 
 ---
 
-## 📸 Screenshots
+<!-- ## 📸 Screenshots
 | Home | Página de Post | Onboarding de Perfil |
 |------|----------------|----------------------|
 | ![home](static/readme/home.png) | ![post](static/readme/post.png) | ![onboarding](static/readme/onboarding.png) |
@@ -87,7 +86,7 @@ static/
 2. `git commit -m "feat: descrição curta"`  
 3. Pull Request  
 
----
+--- -->
 
 ## 📜 Licença
 MIT © 2025 Sabrina Gama  
