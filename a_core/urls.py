@@ -23,8 +23,10 @@ urlpatterns = [
     path('profile/onboarding/', profile_edit_view, name='profile-onboarding'),
     path('commentsent/<pk>', comment_sent, name='comment-sent'),
     path('comment/delete/<pk>/', comment_delete_view, name='comment-delete'),
+    path('comment/<pk>/like', like_comment, name='like-comment'),
     path('reply-sent/<pk>/', reply_sent, name='reply-sent'),
     path('reply-sent/delete/<pk>/', reply_delete_view, name='reply-sent-delete'),
+    path('reply/<pk>/like', like_reply, name='like-reply'),
     
 ]
 

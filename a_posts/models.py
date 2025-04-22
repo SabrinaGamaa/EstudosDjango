@@ -52,6 +52,9 @@ class Comment(models.Model):
     parent_post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     # Conteúdo do comentário (limite de 150 caracteres)
     body = models.CharField(max_length=150)
+    
+    likes = models.ManyToManyField(User, related_name='likedcomments', through='LikedComment' )
+    
     # Data de criação do comentário
     created = models.DateTimeField(auto_now_add=True)
     # ID único do comentário, gerado automaticamente com UUID
@@ -62,16 +65,25 @@ class Comment(models.Model):
             return f'{self.author.username} : {self.body[:30]}'
         except:
             return f'no author : {self.body[:30]}'
-        
-     
+          
     class Meta:
         ordering = ['-created']
+        
+        
+class LikedComment(models.Model):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created =models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f'{self.user.username} : {self.comment.body[:30]}'
  
 
 class Reply(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='replies')
     parent_comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='replies')
     body = models.CharField(max_length=150)
+    likes = models.ManyToManyField(User, related_name='likedreplys', through='LikedReply' )
     created = models.DateTimeField(auto_now_add=True)
     id = models.CharField(max_length=100, default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     
@@ -84,3 +96,12 @@ class Reply(models.Model):
      
     class Meta:
         ordering = ['-created']
+        
+        
+class LikedReply(models.Model):
+    reply = models.ForeignKey(Reply, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created =models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f'{self.user.username} : {self.reply.body[:30]}'
