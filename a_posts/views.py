@@ -20,12 +20,9 @@ def home_view(request, tag=None):
         tag = get_object_or_404(Tag, slug=tag)
     else:
         posts = Post.objects.all()
-        
-    categories = Tag.objects.all()
     
     context = {
         'posts': posts,
-        'categories' : categories,
         'tag' : tag
     }
         

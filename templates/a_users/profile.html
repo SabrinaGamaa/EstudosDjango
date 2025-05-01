@@ -45,14 +45,14 @@
         
         <div class="grid place-items-start gap-x-8 max-w-xl mx-auto lg:grid-cols-2 lg:max-w-5xl xl:grid-cols-3 xl:max-w-7xl">
 
-        {% comment %} {% for post in profile.posts.all %} {% endcomment %}
+        {% for post in profile.user.posts.all %}
         <article class="card">
             <div class="flex items-center justify-between px-4 h-14">
-                <h3 class="text-start leading-5 mr-1">Little Jedi</h3>
-                <div class="text-sm text-gray-400 truncate">flickr<a href="" class="hover:underline ml-1" target="blank">@John Doe</a></div>
+                <h3 class="text-start leading-5 mr-1">{{ post.title }}</h3>
+                <div class="text-sm text-gray-400 truncate">{{ post.author.name }}<a href="{% url 'userprofile' post.author.username %}" class="hover:underline ml-1" target="blank">@{{ post.author.username }}</a></div>
             </div>
             <figure>
-                <a href=""><img class="w-full" src="https://live.staticflickr.com/65535/50618365686_36f887ab88_c.jpg"></a>
+                <a href="{% url 'post' post.id %}"><img class="w-full" src="https://live.staticflickr.com/65535/50618365686_36f887ab88_c.jpg"></a>
             </figure>
             <div class="p-4 pb-2">
                 <a class="flex items-center gap-1 mb-4" href="">
@@ -78,7 +78,7 @@
             </div>
 
         </article>
-        {% comment %} {% endfor %} {% endcomment %}
+        {% endfor %}
         </div>
 
     </div>
