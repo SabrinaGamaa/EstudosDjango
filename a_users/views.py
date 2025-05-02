@@ -3,6 +3,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.contrib import messages
+from django.db.models import Count
 from django.http import Http404
 from django.contrib.auth.models import User
 from a_users.forms import *
@@ -16,7 +17,20 @@ def profile_view(request, username=None):
             profile = request.user.profile
         except:
             raise Http404()
-    return render(request, 'a_users/profile.html', {'profile' : profile})
+    
+    posts = profile.user.posts.all()
+        
+    if request.htmx:
+        if 'top-posts' in request.GET:
+            posts = profile.user.posts.annotate(num_likes=Count('likes')).filter(num_likes__gt=0).order_by('-num_likes')
+            return render(request, 'snippets/loop_profile_posts.html', {'posts' : posts})
+        
+    context = {
+        'profile' : profile,
+        'posts' : posts
+    }
+    
+    return render(request, 'a_users/profile.html', context)
 
 
 @login_required
