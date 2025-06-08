@@ -43,15 +43,19 @@
     </div>
 
     <div id="tab-contents" class="w-full flex flex-col items-center"> 
-        <div class="grid place-items-start gap-x-8 mx-auto   
-            {% if posts.count == 1 %}grid-cols-1 max-w-xl
-            {% elif posts.count == 2 %}grid-cols-1 max-w-xl lg:grid-cols-2 lg:max-w-5xl
-            {% else %}grid-cols-1 max-w-xl lg:grid-cols-2 lg:max-w-5xl xl:grid-cols-3 xl:max-w-7xl 
+        <div class="grid place-items-start gap-x-8 mx-auto max-w-xl  
+            {% if posts.count == 1 %}
+            {% elif posts.count == 2 %} lg:grid-cols-2 lg:max-w-5xl
+            {% else %} lg:grid-cols-2 lg:max-w-5xl xl:grid-cols-3 xl:max-w-7xl 
             {% endif %}">
 
-            {% for post in posts %}
-                {% include "a_posts/post.html" %}
-            {% endfor %}
+            {% if posts %}
+                {% for post in posts %}
+                    {% include "a_posts/post.html" %}
+                {% endfor %}
+            {% else %}
+                <div class="w-full  text-center mt-10">No posts just yet</div>
+            {% endif %}
         </div>
     </div>
 

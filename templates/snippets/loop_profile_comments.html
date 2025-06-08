@@ -1,17 +1,14 @@
 <fade-in class="opacity-0" _="on load transition my opacity to 1 over 0.2 seconds">
-    <div class="grid place-items-start gap-x-8 mx-auto
-
-        {% if comments.count <= 1 %}
-            grid-cols-1 max-w-xl
-        {% elif comments.count == 2 %}
-            grid-cols-1 max-w-xl lg:grid-cols-2 lg:max-w-5xl
-        {% else %}
-            grid-cols-1 max-w-xl lg:grid-cols-2 lg:max-w-5xl xl:grid-cols-3 xl:max-w-7xl 
-        {% endif %}">
+    <div class="w-full lg:w-[50rem] mx-auto">
 
         {% if comments %}
             {% for comment in comments %}
-                {% include "a_posts/comment.html" %}
+                <div class="flex gap-2">
+                    <a href="{% url 'post' comment.parent_post.id %}">
+                        <img class="w-20 h-20 object-cover rounded-xl hover:scale-95 max-w-none" src="{{ comment.parent_post.image }}">
+                    </a>
+                    {% include 'a_posts/comment.html' %}
+                </div>
             {% endfor %}
         {% else %}
             <div class="w-full  text-center mt-10">No comments just yet</div>

@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.db.models import Count
 from django.http import Http404
 from django.contrib.auth.models import User
+from a_posts.forms import ReplyCreateForm
 from a_users.forms import *
 
 
@@ -23,11 +24,18 @@ def profile_view(request, username=None):
     if request.htmx:
         if 'top-posts' in request.GET:
             posts = profile.user.posts.annotate(num_likes=Count('likes')).filter(num_likes__gt=0).order_by('-num_likes')
-            return render(request, 'snippets/loop_profile_posts.html', {'posts' : posts})
         
         elif 'top-comments' in request.GET:
             comments = profile.user.comments.annotate(num_likes=Count('likes')).filter(num_likes__gt=0).order_by('-num_likes')
-            return render(request, 'snippets/loop_profile_comments.html', {'comments' : comments})
+            replyform = ReplyCreateForm()
+            return render(request, 'snippets/loop_profile_comments.html', {'comments' : comments, 'replyform' : replyform})
+        
+        elif 'liked-posts' in request.GET:
+                         # class Post related_name='likedposts'
+            posts = profile.user.likedposts.order_by('-likedpost__created')
+        
+        return render(request, 'snippets/loop_profile_posts.html', {'posts' : posts})
+        
         
     context = {
         'profile' : profile,
