@@ -24,3 +24,13 @@ class Conversation(models.Model):
     participants = models.ManyToManyField(User, related_name='conversations')
     lastmessage_created = models.DateTimeField(default=False)
     is_seen = models.BooleanField(default=False)
+
+    
+    class Meta:
+        ordering = ['-lastmessage_created']
+        
+        
+    def __str__(self):
+        user_names = ", ".join(user.username for user in self.participants.all())
+        return f'[{user_names}]'
+    
