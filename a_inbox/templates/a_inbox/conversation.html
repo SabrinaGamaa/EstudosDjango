@@ -1,31 +1,39 @@
-<div id="conversation" class="col-span-4 sm:col-span-3 opacity-0 flex flex-col bg-white rounded-r-2xl pt-10 relative" 
+<div id="conversation" class="col-span-4 sm:col-span-3 opacity-0 flex flex-col bg-white rounded-r-2xl pt-10 relative overflow-y-auto" 
     _="on load wait for 5ms then remove .opacity-0">
 
+        
+        {% if conversation %}           
+
         <div class="text-center flex flex-col items-center">
-            <a href="/profile">
-                <img class="w-24 h24 rounded-full object-cover mb-4" src="" alt="">
-            </a>
-            <div class="text-center max-w-md">
-                <h1 class="text-lg">Pete</h1>
-                <div class="text-gray-400 mb-2 -mt-5 text-sm">@Pete</div>
-            </div>
+            
+            {% for participant in conversation.participants.all  %}      
+                {% if participant != request.user %}
+                    <a href="{% url 'userprofile' participant.username %}">
+                        <img class="w-24 h24 rounded-full object-cover mb-4" src="{{ participant.profile.avatar }}" alt="Foto de perfil do usuario">
+                    </a>
+                    <div class="text-center max-w-md">
+                        <h1 class="text-lg">{{ participant.profile.name }}</h1>
+                        <div class="text-gray-400 mb-2 -mt-5 text-sm">@{{ participant.username }}</div>
+                    </div>
+                {% endif %}
+            {% endfor %}
         </div>
         
         <ul id="inbox_message" class="flex flex-col justify-end grow gap-6 p-4 sm:p-10 pb-0">            
             {% for message in conversation.messages.all reversed %}
             <li>
                 <div class="flex flex-col md:flex-row gap-1 md:gap-6">
-                    <a class="contents" href="/profile">
-                        <img class="w-14 h-14 object-cover rounded-full" src="" alt="">
+                    <a class="contents" href="{% url 'userprofile' message.sender.username %}">
+                        <img class="w-14 h-14 object-cover rounded-full" src="{{ message.sender.profile.avatar }}" alt="">
                     </a>
                     <div class="bg-white p-4 w-full rounded-xl border-2 border-gray-200">
                         <div class="flex flex-col md:flex-row justify-between text-xs pb-3 text-zinc-500">
                             <div>
-                                <span class="font-bold text-base text-black mr-1">Bart</span>@bart
+                                <span class="font-bold text-base text-black mr-1">{{ message.sender.profile.name }}</span>@{{ message.sender.username }}
                             </div>
-                            <div>DATA HORA ANTES</div>
+                            <div>{{ message.created }} ({{ message.created|timesince }})</div>
                         </div>
-                        <div>Hi, how are you?</div>
+                        <div>{{ message.body }}</div>
                     </div>
                 </div>
             </li>
@@ -33,10 +41,18 @@
 
         </ul>  
         
-        <div class="sticky bottom-0 z-1 pl-4 sm:pl-10 pt-10 flex bg-white">
-            <a href="" class="flex cursor-pointer items-center gap-2 bg-gray-800 hover:bg-indigo-600 text-white rounded-full">
+        <div class="sticky bottom-0 z-1 pl-4 sm:pl-10 pt-6 pb-10 flex bg-white">
+            <a href="" class="flex cursor-pointer items-center gap-2 bg-gray-800 hover:bg-indigo-600 text-white rounded-full px-6 pr-8 py-3">
                 <img class="h-6" src="" alt="">
                 <div class="text-white rounded-full">Reply</div>
             </a>
         </div>
+
+        {% else %}
+
+        <div class="h-full flex items-center justify-center text-gray-500 -mt-6 text-center p-10">
+            Select a conversation or create a new message
+        </div>
+
+        {% endif %}
 </div>
