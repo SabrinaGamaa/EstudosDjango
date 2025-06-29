@@ -117,3 +117,35 @@ def new_message(request, recipient_id):
         'new_message_form' : new_message_form
     }
     return render(request, 'a_inbox/form_newmessage.html', context)
+
+
+@login_required
+def new_reply(request, conversation_id):
+    # Criar um formulário vazio para nova mensagem (sem dados preenchidos ainda)
+    new_message_form = InboxNewMessageForm()
+    # Buscar todas as conversas do usuário atual
+    my_conversations = request.user.conversations.all()
+    # Procurar a conversa com o ID passado na URL dentro daquelas que ele participa | Se não encontrar, retornar erro 404
+    conversation = get_object_or_404(my_conversations, id=conversation_id)
+    
+    if request.method == 'POST':
+        form = InboxNewMessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.sender = request.user
+            message.conversation = conversation
+            message.save()
+            conversation.lastmessage_created = timezone.now()
+            conversation.save()
+            return redirect('inbox', conversation.id)
+    
+    
+    # Preparar os dados para enviar ao template:
+    # - O formulário de nova mensagem (vazio)
+    # - A conversa em que a resposta será enviada
+    context = {
+        'new_message_form' : new_message_form,
+        'conversation' : conversation
+    }
+    
+    return render(request, 'a_inbox/form_newreply.html', context)
