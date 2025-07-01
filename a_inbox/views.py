@@ -18,6 +18,16 @@ def inbox_view(request, conversation_id=None):
         # Buscar essa conversa específica entre as que o usuário participa
         # (ou retornar erro 404 se não existir)
         
+        # Vamos pegar a ultima mensagem
+        latest_message = conversation.messages.first()
+        # Se a conversa ainda não foi visualizada e a mansagem não foi do proprio usuario
+        if conversation.is_seen == False and latest_message.sender != request.user:
+            # Marca a conversa como visualizada
+            conversation.is_seen = True
+            conversation.save()
+            
+        
+        
     # SENÃO:
     else:
         # Nenhuma conversa específica foi selecionada
@@ -93,6 +103,10 @@ def new_message(request, recipient_id):
                     
                     # Atualizar a data do último envio na conversa
                     c.lastmessage_created = timezone.now()
+                    
+                    # Mande a visualização como falsa
+                    c.is_seen = False
+                    
                     # Salvar a conversa
                     c.save()
                     # Redirecionar para a conversa existente
@@ -131,11 +145,19 @@ def new_reply(request, conversation_id):
     if request.method == 'POST':
         form = InboxNewMessageForm(request.POST)
         if form.is_valid():
+            # Criar a mensagem mas ainda não salvar no banco
             message = form.save(commit=False)
+            # Definir o remetente como o usuário logado
             message.sender = request.user
+            # Atribuir a conversa à mensagem
             message.conversation = conversation
             message.save()
+            # Atualizar a data do último envio na conversa
             conversation.lastmessage_created = timezone.now()
+            
+            # Mande a nova conversa com visualização false
+            conversation.is_seen = False
+            
             conversation.save()
             return redirect('inbox', conversation.id)
     
@@ -149,3 +171,27 @@ def new_reply(request, conversation_id):
     }
     
     return render(request, 'a_inbox/form_newreply.html', context)
+
+
+@login_required
+def notify_newmessage(request, conversation_id):
+    conversation = get_object_or_404(Conversation, id=conversation_id)
+    latest_message = conversation.messages.first()
+    if conversation.is_seen == False and latest_message.sender != request.user:
+        return render(request, 'a_inbox/notify_icon.html')
+    else:
+        return HttpResponse('')
+    
+    
+@login_required
+def notify_inbox(request):
+    # Eu pego as conversas e tem que ser o usuario da conversa e a visualização tem que ser False
+    my_conversations = Conversation.objects.filter(participants=request.user, is_seen=False)
+    for c in my_conversations:
+        # Pego a ultima conversa
+        latest_message = c.messages.first()
+        # Se não foi o proprio usuario que mandou
+        if latest_message.sender != request.user:
+            return render(request, 'a_inbox/notify_icon.html')
+    
+    return HttpResponse('')
