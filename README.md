@@ -1,7 +1,7 @@
 # FireBlog (Django 5 + HTMX)
 > Um mini‑blog moderno com posts, comentários, respostas, likes e mensagens em tempo real.
 
-![Screenshot do projeto rodando](imgs/home.png)
+![Screenshot do projeto rodando](imgs/home2.png)
 
 Este repositório contém meu projeto finalizado de um site completo desenvolvido com **Django**, como parte dos meus estudos de desenvolvimento web com Python. O projeto foi acompanhado através do canal do [Andreas Jud no YouTube](https://www.youtube.com/@ajudmeister), onde aprendi na prática a criar sistemas profissionais com Django, HTML, Bootstrap e integração com o HTMX.
 
@@ -146,4 +146,3 @@ Este projeto foi desenvolvido com base nos ensinamentos do canal
 --- 
 
 > *Feito com ☕, ❤️ e uma pitada de HTMX!*
-
