@@ -5,6 +5,12 @@ from django.db.models import Q
 from a_users.models import Profile
 from .models import *
 from .forms import InboxNewMessageForm
+from cryptography.fernet import Fernet
+from django.conf import settings
+
+
+f = Fernet(settings.ENCRYPT_KEY)
+
 
 @login_required
 def inbox_view(request, conversation_id=None):
@@ -87,6 +93,29 @@ def new_message(request, recipient_id):
         if form.is_valid():
             # Criar a mensagem mas ainda não salvar no banco
             message = form.save(commit=False)
+            
+            # Vamos criptografar as mensagens dos usuarios
+            message_original = form.cleaned_data['body']
+            message_bytes = message_original.encode('utf-8')
+            message_encrypted = f.encrypt(message_bytes)
+            # Guardar em string para salvar no banco (por causa do SQLite/PostgreSQL)
+            message_encrypted_str = message_encrypted.decode('utf-8')
+            message.body = message_encrypted_str
+
+            # print('message_original: ', message_original)
+            # print('message_bytes: ', message_bytes)
+            # print('message_encrypted: ', message_encrypted)
+            # print('message_decoded: ', message_encrypted_str)
+
+            # Recuperar para descriptografar (reconverter a string para bytes)
+            # message_loaded_bytes = message_encrypted_str.encode('utf-8')
+            # message_decrypted = f.decrypt(message_loaded_bytes)
+            # message_decoded = message_decrypted.decode('utf-8')
+            
+            # print('message_decoded: ', message_decoded)      
+            # print('message_decrypted: ', message_decrypted)
+      
+            
             # Definir o remetente como o usuário logado
             message.sender = request.user
             
@@ -147,10 +176,20 @@ def new_reply(request, conversation_id):
         if form.is_valid():
             # Criar a mensagem mas ainda não salvar no banco
             message = form.save(commit=False)
+            
+            message_original = form.cleaned_data['body']
+            message_bytes = message_original.encode('utf-8')
+            message_encrypted = f.encrypt(message_bytes)
+            # Guardar em string para salvar no banco (por causa do SQLite/PostgreSQL)
+            message_encrypted_str = message_encrypted.decode('utf-8')          
+            message.body = message_encrypted_str
+            
+            
             # Definir o remetente como o usuário logado
             message.sender = request.user
             # Atribuir a conversa à mensagem
             message.conversation = conversation
+            
             message.save()
             # Atualizar a data do último envio na conversa
             conversation.lastmessage_created = timezone.now()
